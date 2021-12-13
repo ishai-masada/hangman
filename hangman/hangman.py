@@ -61,11 +61,12 @@ def generate_word(list_of_words):
 
     return answer
 
-def get_guess(letter_position):
+# Ask the player to guess a letter
+def get_guess():
 
     # Make a while loop to ask the player for a correct answer until they give a valid response
     while True:
-        guess = input(f"\nGuess letter {letter_position+1}: ")
+        guess = input(f"\nGuess a letter in the word: ")
 
         # Check if the length of the input was not 1
         if len(guess) != 1:
@@ -79,64 +80,55 @@ def get_guess(letter_position):
 
     return guess
 
-def verify_guess(guess, answer, index):
+# Check if the player's guess was correct
+def verify_guess(answer, answer_progress, correct_guesses, incorrect_guesses, \
+                 guess):
+
+    results = [correct_guesses, incorrect_guesses, answer_progress]
 
     # Check if the guess is equal to the letter in the answer
-    if guess == answer[index]:
-        print("\nYou guessed the correct letter!")
-        return True
+    if guess in answer:
+        print("\nYou guessed a correct letter!")
+        if correct_guesses.count(guess) < answer.count(guess):
+            correct_guesses.append(guess)
+            answer_progress += 1
     else:
-        print("\nYou guessed an incorrect letter!")
-        return False
+        print("\nYou guessed a incorrect letter!")
+        incorrect_guesses.append(guess)
 
-def display(guesses, answer):
-    global correct_letters
-    global incorrect_letters
-
-    #These are the correct letters
-    correct_letters = []
-
-    # These are the incorrect letters
-    incorrect_letters = []
-
-    answer = list(answer)
-
-    # Fill the display list with the amount of underscores as there are letters in the answer
-    for _ in range(0, len(answer)):
-        correct_letters.append('_')
-
-    # Iterate over the answer and geusses simultaneously to check each guess
-    for idx, group in enumerate(zip(answer, guesses)):
-        letter = group[0]
-        guess = group[1]
-        if letter == guess:
-            correct_letters.insert(idx, guess)
-            correct_letters.remove(correct_letters[idx+1])
-        else:
-            incorrect_letters.append(guess)
-
-    results = [correct_letters, incorrect_letters]
     return results
+
+# Display correct and incorrect guesses to the user
+def display(results=list):
+
+    correct_guesses = ' '.join(results[0])
+    incorrect_guesses = ' '.join(results[1])
+    print(f'\nincorrect_guesses: {incorrect_guesses}')
+    print(f'\ncorrect_guesses: {correct_guesses}')
+
 
 # Load in the list of words
 load_file()
 
 # Pick a random word from the list of words
 answer = generate_word(word_list).strip()
+print(answer)
 
+# Number of chances that the player has to guess the word
 number_of_guesses = 7
 
-# This is a list of the player's guesses
-total_guesses = []
+correct_guesses = []
+incorrect_guesses = []
 
 # This is the number of letters that the player has guessed correctly
 answer_progress = 0
 
 while True:
+
     print(f"\nNumber of guesses left: {number_of_guesses}")
 
     #Check if the guessed letters equals the word
-    if ''.join(total_guesses) == answer:
+    if sorted(correct_guesses) == sorted(answer):
         print("\nYou guessed the word! You win!")
         break
 
@@ -145,19 +137,13 @@ while True:
         print("\nYou were not able to guess the word! You lose!")
         break
 
-    # Get the player's guess
-    guess = get_guess(answer_progress)
+    guess = get_guess()
 
-    # Put the guess in the list of guesses
-    total_guesses.append(guess)
+    # Verify the player's guess with the verify function and store the results into a variable
+    results = verify_guess(answer, answer_progress, correct_guesses, incorrect_guesses, \
+                           guess)
 
-    # Check if the guessed letter is the next letter in the word
-    elif verify_guess(guess, answer, answer_progress):
-        answer_progress += 1
+    # Display information to the user
+    display(results)
 
-    print('\n')
-    results = display(total_guesses, answer)
-    # print(' '.join(results[0]))
-    # print('\n')
-    # print(' '.join(results[1]))
     number_of_guesses -= 1
