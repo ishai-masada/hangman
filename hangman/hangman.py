@@ -114,4 +114,5 @@ def hangman():
 
         number_of_guesses -= 1
 
-hangman()
+if __name__ == "__main__":
+    hangman()
